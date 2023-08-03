@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:id="@+id/map"
+        android:layout_marginBottom="10dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="95dp"
+            android:layout_height="wrap_content"
+            android:text="Latitude: "
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:paddingLeft="10dp"/>
+
+        <EditText
+            android:id="@+id/latitudeET"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter latitude value here"
+            android:textSize="20sp"
+            android:maxLength="17"
+            android:inputType="numberDecimal"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="95dp"
+            android:layout_height="wrap_content"
+            android:text="longitude: "
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:paddingLeft="10dp"/>
+
+        <EditText
+            android:id="@+id/longitudeET"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter longitude value here"
+            android:textSize="20sp"
+            android:inputType="numberDecimal"
+            android:maxLength="17"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OR"
+        android:layout_gravity="center"
+        android:textSize="20sp"
+        android:padding="10dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="95dp"
+            android:layout_height="wrap_content"
+            android:text="Area: "
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:paddingLeft="10dp"/>
+
+        <EditText
+            android:id="@+id/areaET"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter area name"
+            android:textSize="20sp"
+            android:inputType="text"
+            android:maxLength="17"/>
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/submitBTN"
+        android:text="Show"
+        android:backgroundTint="@color/button"
+        android:layout_gravity="center"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="bottom"
+        android:paddingBottom="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textTV"
+            android:text="Decorate text with the help of following buttons"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:padding="10dp"
+            android:fontFamily="sans-serif"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/boldBTN"
+                android:text="B"
+                android:textStyle="bold"
+                android:backgroundTint="@color/button"
+                android:layout_margin="2dp"
+                app:cornerRadius="0dp"
+                android:textSize="20sp"/>
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/italicBTN"
+                android:text="/"
+                android:backgroundTint="@color/button"
+                android:layout_margin="2dp"
+                app:cornerRadius="0dp"
+                android:textSize="20sp"/>
+
+            <ImageButton
+                android:id="@+id/underlineBTN"
+                android:layout_width="50dp"
+                android:layout_height="40dp"
+                android:layout_margin="2dp"
+                android:background="@color/button"
+                android:src="@drawable/baseline_format_underlined_24"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
