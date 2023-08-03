@@ -3,7 +3,9 @@ package com.example.first_kotlin_project
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Typeface
+import android.location.Address
 import android.location.Geocoder
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.SpannableString
@@ -14,6 +16,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import com.example.first_kotlin_project.databinding.ActivityMainBinding
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -28,7 +31,8 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding:ActivityMainBinding
+    private lateinit var geocoder: Geocoder
+
     private lateinit var database:DatabaseReference
 
     private var count:Int = 1
@@ -38,13 +42,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var latET: EditText
     private lateinit var longET: EditText
+
     private lateinit var areaET: EditText
+    private lateinit var showButton: Button
 
     private lateinit var textTV: TextView
     private var isBold = false
     private var isItalic = false
     private var isUnderlined = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //binding = ActivityMainBinding.inflate(layoutInflater)
@@ -61,13 +66,6 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
                 return@OnMapReadyCallback
             }
             googleMap.isMyLocationEnabled = true
@@ -78,13 +76,14 @@ class MainActivity : AppCompatActivity() {
         })
 
 
+        geocoder = Geocoder(this, Locale.getDefault())
+
         latET = findViewById(R.id.latitudeET)
         longET = findViewById(R.id.longitudeET)
-        areaET = findViewById(R.id.longitudeET)
         val submitBTN = findViewById<Button>(R.id.submitBTN)
         submitBTN.setOnClickListener { submitFunc() }
 
-        ////////////Code Decoration Code
+        //Code Decoration Code
         textTV = findViewById(R.id.textTV)
         textTV.setTypeface(null, Typeface.NORMAL) // Initialize the typeface to normal
 
@@ -96,10 +95,10 @@ class MainActivity : AppCompatActivity() {
         italicBTN.setOnClickListener { italicFunc() }
         underlineBTN.setOnClickListener { underlineFunc() }
 
-
         database = FirebaseDatabase.getInstance().getReference("Maps")
         var entryCount: Int = 0
         database.addListenerForSingleValueEvent(object : ValueEventListener {
+            @RequiresApi(Build.VERSION_CODES.TIRAMISU)
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 entryCount = dataSnapshot.childrenCount.toInt()
                 count = entryCount+1
@@ -113,6 +112,34 @@ class MainActivity : AppCompatActivity() {
 
                             val databaseLocation = LatLng(latDatabase, longDatabase)
                             googleMap.addMarker(MarkerOptions().position(databaseLocation).title("Location "+i))
+
+                            //
+                            //
+                            //
+                            val geocoder = Geocoder(applicationContext, Locale.getDefault())
+
+                            Thread {
+                                try {
+                                    val addresses: List<Address>? = geocoder.getFromLocation(latDatabase, longDatabase, 1)
+                                    // Check if the addresses list is not empty and handle the result
+                                    if (addresses != null && addresses.isNotEmpty()) {
+                                        val address = addresses[0].getAddressLine(0)
+                                        runOnUiThread {
+                                            Toast.makeText(applicationContext, address.toString(), Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                } catch (e: IOException) {
+                                    e.printStackTrace()
+                                    runOnUiThread {
+                                        Toast.makeText(applicationContext, e.message.toString(), Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }.start()
+
+
+
+
+
                         }else{
                             Toast.makeText(applicationContext, "Map Doesn't Exist", Toast.LENGTH_SHORT).show()
                         }
@@ -128,7 +155,57 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        
+
+        areaET = findViewById(R.id.areaET)
+        showButton = findViewById(R.id.showBTN)
+
+        showButton.setOnClickListener {
+            val area = areaET.text.toString().trim()
+            if (area.isNotEmpty()) {
+                getCoordinatesFromCityName(area)
+            } else {
+                Toast.makeText(applicationContext, "Please enter a city name", Toast.LENGTH_SHORT).show()
+            }
+        }
+
     }
+
+    private fun getCoordinatesFromCityName(area: String) {
+        val geocoder = Geocoder(applicationContext, Locale.getDefault())
+
+        Thread {
+            try {
+                val addresses: List<Address>? = geocoder.getFromLocationName(area, 1)
+                // Check if the addresses list is not empty and handle the result
+                if (addresses != null && addresses.isNotEmpty()) {
+                    val address = addresses[0]
+                    val latitude = address.latitude
+                    val longitude = address.latitude
+
+                    runOnUiThread {
+                        val message = "Latitude: $latitude\nLongitude: $longitude"
+                        Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+
+                        val userEnterLocation = LatLng(address.latitude, address.latitude)
+                        googleMap.addMarker(MarkerOptions().position(userEnterLocation).title("User Enter Location"))
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userEnterLocation,15f))
+
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(applicationContext, "No results found for the given city", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                runOnUiThread {
+                    Toast.makeText(applicationContext, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
+    }
+
 
     private fun submitFunc() {
         val latitude = latET.text.toString()
@@ -147,30 +224,37 @@ class MainActivity : AppCompatActivity() {
             database = FirebaseDatabase.getInstance().getReference("Maps")
             val mapData = MapData(latitude, longitude)
             database.child("Location "+count++).setValue(mapData).addOnSuccessListener {
+
+                val geocoder = Geocoder(applicationContext, Locale.getDefault())
+
+                Thread {
+                    try {
+                        val addresses: List<Address>? = geocoder.getFromLocation(latitudeDouble, longitudeDouble, 1)
+                        // Check if the addresses list is not empty and handle the result
+                        if (addresses != null && addresses.isNotEmpty()) {
+                            val address_1 = addresses[0].getAddressLine(0)
+                            runOnUiThread {
+                                Toast.makeText(applicationContext, address_1.toString(), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        runOnUiThread {
+                            Toast.makeText(applicationContext, e.message.toString(), Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }.start()
+
+
                 latET.setText("")
                 longET.setText("")
 
                 Toast.makeText(this, "Successfully Saved", Toast.LENGTH_SHORT).show()
+
             }
         }
 
-
-
-//        var city = areaET.text.toString()
-//        var gc = Geocoder(this, Locale.getDefault())
-//
-//        try{
-//            var addresses = gc.getFromLocationName(city, 2)
-//            var address = addresses?.get(0)
-//            var latLong = "${address?.latitude} \n ${address?.longitude}"
-//            Toast.makeText(applicationContext, latLong, Toast.LENGTH_SHORT).show()
-//        }catch (ex: Exception){
-//            Toast.makeText(applicationContext, ex.message.toString(), Toast.LENGTH_SHORT).show()
-//        }
-
     }
-
-
 
 
     private fun boldFunc(){
@@ -194,7 +278,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun italicFunc(){
         isItalic = !isItalic
         if (isItalic) {
@@ -216,7 +299,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun underlineFunc(){
         val text = textTV.text.toString()
         val spannableString = SpannableString(text)
