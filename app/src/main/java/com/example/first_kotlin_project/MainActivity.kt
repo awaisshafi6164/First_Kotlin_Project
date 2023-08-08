@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var database:DatabaseReference
 
     private var count:Int = 1
-
     lateinit var mapFragment:SupportMapFragment
     lateinit var googleMap:GoogleMap
 
