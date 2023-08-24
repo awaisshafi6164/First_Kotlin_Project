@@ -18,7 +18,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
-import com.example.first_kotlin_project.databinding.ActivityMainBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -153,8 +152,6 @@ class MainActivity : AppCompatActivity() {
                 println("Error: ${databaseError.message}")
             }
         })
-
-        
 
         areaET = findViewById(R.id.areaET)
         showButton = findViewById(R.id.showBTN)
